@@ -12,11 +12,10 @@ export class UserJSONService implements UserService {
         this.writeDefaultUsersJsonFile();
     }
 
-    add(username: string): User {
+    add(username: string, password: string , email:string ): User {
         const users = this.getUsersFromJsonFile();
-
         const newId = this.generateUniqueId(users);
-        const newUser = new User(newId, username);
+        const newUser = new User(newId, username, password, email);
 
         users.push(newUser);
         this.overrideUsers(users);
@@ -29,6 +28,31 @@ export class UserJSONService implements UserService {
 
         const existingUser = users.find((user) => user.id == id);
         return existingUser || null;
+    }
+
+    update(id: number,username: string, password: string, email: string): User {
+        const users = this.getUsersFromJsonFile();
+        const existingUser = users.find((user) => user.id == id);
+        if (!existingUser) {
+            throw new Error(`User with id ${id} not found`);
+        }
+        existingUser.username = username;
+        existingUser.password = password;
+        existingUser.email = email;
+        this.overrideUsers(users);
+        return existingUser;
+    }
+    delete(id: number): User{
+        const user = this.getUsersFromJsonFile();
+        const existingUser = user.find((user) => user.id == id);
+        if (!existingUser) {
+            throw new Error(`User with id ${id} not found`);
+        }
+        const index = user.indexOf(existingUser);
+        user.splice(index, 1);
+        this.overrideUsers(user);
+        const message = " user deleted successfully"
+        return existingUser;
     }
 
     private writeDefaultUsersJsonFile(): void {
